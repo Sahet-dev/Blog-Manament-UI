@@ -4,7 +4,17 @@
 
     <!-- Filter Form -->
     <form @submit.prevent="fetchPosts" class="mb-6">
-      <div class="flex flex-wrap gap-4 mb-4">
+      <!-- Toggle Button -->
+      <button
+          type="button"
+          @click="toggleFilters"
+          class="bg-gray-500 text-white px-4 py-2 rounded mb-4"
+      >
+        {{ filtersVisible ? 'Hide Filters' : 'Show Filters' }}
+      </button>
+
+      <!-- Filter Inputs and Apply Filters Button -->
+      <div v-show="filtersVisible" class="flex flex-wrap gap-4 mb-4">
         <!-- Author Username -->
         <div class="flex flex-col w-full sm:w-auto">
           <label for="author_username" class="text-sm font-semibold text-gray-700">Author Username</label>
@@ -66,11 +76,14 @@
               placeholder="End date"
           />
         </div>
-      </div>
 
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-        Apply Filters
-      </button>
+        <!-- Apply Filters Button (inside v-show) -->
+        <div class="w-full sm:w-auto">
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+            Apply Filters
+          </button>
+        </div>
+      </div>
     </form>
 
     <!-- Posts List -->
@@ -109,26 +122,24 @@ const filters = ref({
   limit: 10,
   category: '',
   keyword: '',
-  author_username: '', // Matches backend query parameter
+  author_username: '',
   start_date: '',
   end_date: ''
 });
 
-// Format date for display
+const filtersVisible = ref(false);
+
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-// Fetch posts applying filters as query parameters
 const fetchPosts = async () => {
   try {
-    // Convert date filters to ISO format
     const params = {
       skip: filters.value.skip,
       limit: filters.value.limit
     };
 
-    // Add filters only if they have values
     ['category', 'keyword', 'author_username', 'start_date', 'end_date'].forEach((key) => {
       if (filters.value[key]) {
         params[key] = key.includes('date') ? new Date(filters.value[key]).toISOString() : filters.value[key];
@@ -142,10 +153,10 @@ const fetchPosts = async () => {
   }
 };
 
-// Fetch posts on component mount
 onMounted(fetchPosts);
+
+const toggleFilters = () => {
+  filtersVisible.value = !filtersVisible.value;
+};
 </script>
 
-<style>
-/* Custom styles if needed */
-</style>
